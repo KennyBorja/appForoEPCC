@@ -39,7 +39,6 @@ public class PostService implements IPostService{
         if (user == null) {
             throw new IllegalArgumentException("Usuario no encontrado con ID: " + userId);
         }
-
         // Crear la entrada
         Entry entrySaved = entryService.createEntry(user, content);
 
@@ -61,7 +60,6 @@ public class PostService implements IPostService{
         throw new IllegalStateException("No se pudo crear el post. Detalles: " + e.getMessage(), e);
     }
 }
-
 
 
   @Transactional(readOnly = true)

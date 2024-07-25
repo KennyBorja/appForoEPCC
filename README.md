@@ -20,6 +20,9 @@ se a seguido las siguientes convenciones en la implementacion:
 
 uso de nombres claros y descriptivos para la clase y variables, lo que facilita la comprensión del código.
 
+### excepciones
+
+un mejor manejo en las excepciones
 
 ## -----------------------------------------------------------------------------------------------------------
 
