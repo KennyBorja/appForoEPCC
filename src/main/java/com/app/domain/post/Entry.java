@@ -2,10 +2,14 @@ package com.app.domain.post;
 
 import java.time.LocalDateTime;
 
+import org.hibernate.annotations.CreationTimestamp;
+
 import com.app.domain.user.ForoUser;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -13,7 +17,17 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
+@Getter
+@Setter
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 @Entity
 @Table(name = "entry")
 public class Entry {
@@ -21,7 +35,8 @@ public class Entry {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
   
-  @ManyToOne
+  @JsonIgnore
+  @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "id_user",referencedColumnName = "id",foreignKey = @ForeignKey(name = "FK_user_entry"),nullable = false)
   private ForoUser user;
 
@@ -29,74 +44,20 @@ public class Entry {
   private String content;
 
   @Column(columnDefinition = "INT DEFAULT 0")
-  private int up_votes;
+  private int upVotes;
 
   @Column(columnDefinition = "INT DEFAULT 0")
-  private int down_votes;
+  private int downVotes;
 
   @Column(columnDefinition = "INT DEFAULT 0")
   private int comments;
 
-  @Column(nullable = false,updatable = false,columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
-  private LocalDateTime created_at;
+  @CreationTimestamp
+  @Column(name="created_at",updatable = false, nullable = false)
+  private LocalDateTime createdAt;
 
-  @Column(nullable = false,columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
-  private LocalDateTime last_update;
-
-  public Long getId() {
-    return id;
-  }
-
-  public ForoUser getUser() {
-    return user;
-  }
-
-  public String getContent() {
-    return content;
-  }
-
-  public int getUp_votes() {
-    return up_votes;
-  }
-
-  public int getDown_votes() {
-    return down_votes;
-  }
-
-  public int getComments() {
-    return comments;
-  }
-
-  public LocalDateTime getCreated_at() {
-    return created_at;
-  }
-
-  public LocalDateTime getLast_update() {
-    return last_update;
-  }
-
-  public void setContent(String content) {
-    this.content = content;
-  }
-
-  public void setUp_votes(int up_votes) {
-    this.up_votes = up_votes;
-  }
-
-  public void setDown_votes(int down_votes) {
-    this.down_votes = down_votes;
-  }
-
-  public void setComments(int comments) {
-    this.comments = comments;
-  }
-
-  public void setLast_update(LocalDateTime last_update) {
-    this.last_update = last_update;
-  }
-
-  public void setUser(ForoUser user) {
-    this.user = user;
-  }
+  @CreationTimestamp
+  @Column(name = "last_update",nullable = false)
+  private LocalDateTime lastUpdate;
   
 }

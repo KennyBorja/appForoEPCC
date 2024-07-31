@@ -7,6 +7,6 @@ public interface IEntryService {
 
   public Entry createEntry(ForoUser user,String content);
 
-  public void addCommentToEntry(Long id_entry);
+  public void addCommentToEntry(Long idEntry);
   
 }
