@@ -30,28 +30,16 @@ import com.app.services.interfaces.user.IUserService;
 @Service
 public class UserService implements IUserService {
 
-  private IPersonService personService;
+  private final UserRepositoryImp userRepository;
+  private final IPersonService personService;
+  private final PasswordEncoder passwordEncoder;
+  private final JwtUtil jwtUtil;
 
   @Autowired
-  public UserService(IPersonService personService) {
-    this.personService = personService;
-  }
-
-  private UserRepositoryImp userRepository;
-
-  public UserService(@Autowired UserRepositoryImp userRepository) {
+  public UserService(IPersonService personService, UserRepositoryImp userRepository, PasswordEncoder passwordEncoder, JwtUtil jwtUtil) {
     this.userRepository = userRepository;
-  }
-
-  PasswordEncoder passwordEncoder;
-
-  public UserService(@Autowired PasswordEncoder passwordEncoder) {
+    this.personService = personService;
     this.passwordEncoder = passwordEncoder;
-  }
-
-  private JwtUtil jwtUtil;
-
-  public UserService(@Autowired JwtUtil jwtUtil) {
     this.jwtUtil = jwtUtil;
   }
 
@@ -59,14 +47,13 @@ public class UserService implements IUserService {
   @Transactional
   public ForoUser registerUser(SignupFieldsDTO fields) {
     try {
-      Person personCreated = personService.createPerson(fields.firstName(), fields.lastName(), fields.email(),
-          fields.birthDay());
+      Person personCreated = personService.createPerson(fields.firstName(), fields.lastName(), fields.email(), fields.birthDay());
       Role userRole = Role.builder().name("USER").build();
       Role adminRole = Role.builder().name("ADMIN").build();
 
       ForoUser userCreated = ForoUser.builder()
           .username(fields.username())
-          .password(fields.password())
+          .password(passwordEncoder.encode(fields.password()))  // Asegúrate de codificar la contraseña al crear el usuario
           .person(personCreated)
           .roles(Set.of(userRole, adminRole))
           .build();
@@ -99,7 +86,6 @@ public class UserService implements IUserService {
         userFound.isCredentialNoExpired(),
         userFound.isAccountNoLocked(),
         authorityList);
-
   }
 
   public Authentication authenticate(String username, String password) {
@@ -114,7 +100,6 @@ public class UserService implements IUserService {
     }
 
     return new UsernamePasswordAuthenticationToken(username, userFound.getPassword(), userFound.getAuthorities());
-
   }
 
   public String loginUser(LoginRequestDTO loginRequest) {
