@@ -1,6 +1,91 @@
-# Proyecto de Foro
+# Documentación de Estilos de Programación Usados en el Proyecto de Foro
 
-Este proyecto es una implementación de un foro donde los usuarios pueden comentar en las entradas. La clase `Post` es  parte fundamental de esta implementación.
+## 1. Cookbook
+**Descripción**: método createPost es una "receta" completa para crear un post
+
+**Ejemplo**:
+
+```java
+@Override
+@Transactional
+public Post createPost(Long idUser, String title, String content) {
+    try {
+        String user = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
+        ForoUser userFound = userService.getUserByUsername(user);
+        Entry entrySaved = entryService.createEntry(userFound, content);
+
+        Post postCreated = new Post();
+        postCreated.setEntry(entrySaved);
+        postCreated.setTitle(title);
+
+        return postRepository.save(postCreated);
+    } catch (Exception e) {
+        throw new CreationException("No se pudo crear el post");
+    }
+}
+```
+
+## 2. Pipeline
+**Descripción**: El código sigue una secuencia de operaciones que se encadenan una tras otra
+
+
+**Ejemplo**:
+
+```java
+@Override
+public List<Post> searchWord(String query) {
+    SearchSession searchSession = Search.session(entityManager);
+    Set<Post> uniqueResults = new HashSet<>(searchSession.search(Post.class)
+            .where(f -> f.match()
+                    .fields("title")
+                    .matching(query)
+                    .analyzer("multilingual")
+                    .fuzzy(2))
+            .sort(f -> f.score())
+            .fetchHits(20));
+    return new ArrayList<>(uniqueResults);
+}
+
+
+```
+## 3. Persistent-Tables
+**Descripción**: @Entity: esta clase es una entidad JPA, se mapeará a una tabla en la base de datos, @Table: Especifica el nombre de la tabla en la base de datos.
+
+**Ejemplo**:
+
+```java
+
+@Entity
+@Table(name = "post")
+public class Post {
+
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
+
+  @OneToOne(cascade = CascadeType.REMOVE)
+  @JoinColumn(
+    name = "id_entry",
+    referencedColumnName = "id",
+    foreignKey = @ForeignKey(name = "FK_entry_post"),
+    nullable = false
+  )
+  private Entry entry;
+
+  @Column(nullable = false)
+  private String title;
+
+  @Column(columnDefinition = "INT DEFAULT 0")
+  private int views;
+
+  @Column(columnDefinition = "INT DEFAULT 0")
+  private int answers;
+
+}
+
+```
+
+
 
 ## Convenciones de Codificación
 
